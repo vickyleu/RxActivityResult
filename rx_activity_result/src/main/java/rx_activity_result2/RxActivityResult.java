@@ -83,7 +83,8 @@ public class RxActivityResult {
 
             activitiesLifecycle.getOLiveActivity().subscribe(new Consumer<Activity>() {
                 @Override public void accept(Activity activity) throws Exception {
-                    activity.startActivity(new Intent(activity, HolderActivity.class));
+                    activity.startActivity(new Intent(activity, HolderActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 }
             });
 
