@@ -67,17 +67,22 @@ public class RxActivityResult {
 
         public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, Bundle options) {
             RequestIntentSender requestIntentSender = new RequestIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, options);
-            return startHolderActivity(requestIntentSender);
+            return startHolderActivity(requestIntentSender, null);
         }
 
         public Observable<Result<T>> startIntent(final Intent intent) {
-            return startHolderActivity(new Request(intent));
+            return startIntent(intent, null);
         }
 
-        private Observable<Result<T>> startHolderActivity(Request request) {
+        public Observable<Result<T>> startIntent(final Intent intent, OnPreResult onPreResult) {
+            return startHolderActivity(new Request(intent), onPreResult);
+        }
+
+        private Observable<Result<T>> startHolderActivity(Request request, OnPreResult onPreResult) {
 
             OnResult onResult = uiTargetActivity ? onResultActivity() : onResultFragment();
             request.setOnResult(onResult);
+            request.setOnPreResult(onPreResult);
 
             HolderActivity.setRequest(request);
 

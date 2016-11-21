@@ -36,6 +36,7 @@
         <activity android:name="app.multi_start.MultiStartActivity" />
         <activity android:name="app.multi_start.FirstActivity"/>
         <activity android:name="app.multi_start.SecondActivity"/>
+        <activity android:name="app.OnPreResultActivity" />
     </application>
 
 </manifest>

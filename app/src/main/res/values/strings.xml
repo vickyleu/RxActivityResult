@@ -8,4 +8,5 @@
     <string name="using_nested_fragment">Using nested fragment</string>
     <string name="intent_sender">Intent sender</string>
     <string name="multi_start">Multi start</string>
+    <string name="pre_result">Pre result processing</string>
 </resources>
