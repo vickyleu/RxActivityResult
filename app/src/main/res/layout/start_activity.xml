@@ -27,4 +27,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/multi_start" />
+
+    <Button
+        android:id="@+id/bt_pre_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pre_result" />
 </LinearLayout>

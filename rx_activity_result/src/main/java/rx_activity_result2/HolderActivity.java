@@ -20,9 +20,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import io.reactivex.functions.Action;
 
 public class HolderActivity extends Activity {
     private static Request request;
+    private OnPreResult onPreResult;
     private OnResult onResult;
     private int resultCode;
     private Intent data;
@@ -35,6 +37,7 @@ public class HolderActivity extends Activity {
             return;
         }
 
+        onPreResult = request.onPreResult();
         onResult = request.onResult();
 
         if (savedInstanceState != null) return;
@@ -76,7 +79,17 @@ public class HolderActivity extends Activity {
         this.resultCode = resultCode;
         this.data = data;
 
-        finish();
+        if (this.onPreResult != null) {
+            this.onPreResult.response(resultCode, data)
+                .doOnComplete(new Action() {
+                    @Override public void run() throws Exception {
+                        finish();
+                    }
+                })
+                .subscribe();
+        } else {
+            finish();
+        }
     }
 
     @Override protected void onDestroy() {

@@ -29,5 +29,8 @@ public class StartActivity extends AppCompatActivity {
             startActivity(new Intent(StartActivity.this, MultiStartActivity.class));
         });
 
+        findViewById(R.id.bt_pre_result).setOnClickListener(view -> {
+            startActivity(new Intent(StartActivity.this, OnPreResultActivity.class));
+        });
     }
 }
