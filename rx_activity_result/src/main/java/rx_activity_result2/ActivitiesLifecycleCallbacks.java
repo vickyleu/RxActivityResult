@@ -3,6 +3,8 @@ package rx_activity_result2;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
@@ -46,7 +48,7 @@ class ActivitiesLifecycleCallbacks {
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
-    Activity getLiveActivity() {
+    @Nullable Activity getLiveActivity() {
         return liveActivityOrNull;
     }
 
