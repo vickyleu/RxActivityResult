@@ -57,6 +57,13 @@ RxActivityResult.on(this).startIntent(takePhoto)
         .subscribe(result -> {
             Intent data = result.data();
             int resultCode = result.resultCode();
+            // the requestCode using which the activity is started can be received here.
+            int requestCode = result.requestCode();
+
+            if(requestCode == YourActivity.YOUR_REQUEST_CODE)
+            {
+                // Do Something
+            }
 
             if (resultCode == RESULT_OK) {
                 result.targetUI().showImage(data);

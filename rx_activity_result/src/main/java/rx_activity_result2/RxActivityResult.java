@@ -26,16 +26,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
-import java.util.List;
 
 
 public final class RxActivityResult {
     static ActivitiesLifecycleCallbacks activitiesLifecycle;
 
-    private RxActivityResult() {}
+    private RxActivityResult() {
+    }
 
     public static void register(final Application application) {
         activitiesLifecycle = new ActivitiesLifecycleCallbacks(application);
@@ -89,9 +91,10 @@ public final class RxActivityResult {
             HolderActivity.setRequest(request);
 
             activitiesLifecycle.getOLiveActivity().subscribe(new Consumer<Activity>() {
-                @Override public void accept(Activity activity) throws Exception {
+                @Override
+                public void accept(Activity activity) throws Exception {
                     activity.startActivity(new Intent(activity, HolderActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
+                            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 }
             });
 
@@ -100,7 +103,8 @@ public final class RxActivityResult {
 
         private OnResult onResultActivity() {
             return new OnResult() {
-                @Override public void response(int resultCode, Intent data) {
+                @Override
+                public void response(int requestCode, int resultCode, Intent data) {
                     if (activitiesLifecycle.getLiveActivity() == null) return;
 
                     //If true it means some other activity has been stacked as a secondary process.
@@ -110,7 +114,7 @@ public final class RxActivityResult {
                     }
 
                     T activity = (T) activitiesLifecycle.getLiveActivity();
-                    subject.onNext(new Result<>(activity, resultCode, data));
+                    subject.onNext(new Result<>(activity, requestCode, resultCode, data));
                     subject.onComplete();
                 }
             };
@@ -118,7 +122,8 @@ public final class RxActivityResult {
 
         private OnResult onResultFragment() {
             return new OnResult() {
-                @Override public void response(int resultCode, Intent data) {
+                @Override
+                public void response(int requestCode, int resultCode, Intent data) {
                     if (activitiesLifecycle.getLiveActivity() == null) return;
 
                     Activity activity = activitiesLifecycle.getLiveActivity();
@@ -128,8 +133,8 @@ public final class RxActivityResult {
 
                     Fragment targetFragment = getTargetFragment(fragmentManager.getFragments());
 
-                    if(targetFragment != null) {
-                        subject.onNext(new Result<>((T) targetFragment, resultCode, data));
+                    if (targetFragment != null) {
+                        subject.onNext(new Result<>((T) targetFragment, requestCode, resultCode, data));
                         subject.onComplete();
                     }
 
@@ -139,11 +144,12 @@ public final class RxActivityResult {
             };
         }
 
-        @Nullable Fragment getTargetFragment(List<Fragment> fragments) {
+        @Nullable
+        Fragment getTargetFragment(List<Fragment> fragments) {
             if (fragments == null) return null;
 
             for (Fragment fragment : fragments) {
-                if(fragment != null && fragment.isVisible() && fragment.getClass() == clazz) {
+                if (fragment != null && fragment.isVisible() && fragment.getClass() == clazz) {
                     return fragment;
                 } else if (fragment != null && fragment.getChildFragmentManager() != null) {
                     List<Fragment> childFragments = fragment.getChildFragmentManager().getFragments();
