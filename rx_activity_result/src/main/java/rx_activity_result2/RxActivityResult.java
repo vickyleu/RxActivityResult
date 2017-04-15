@@ -117,6 +117,11 @@ public final class RxActivityResult {
                     subject.onNext(new Result<>(activity, requestCode, resultCode, data));
                     subject.onComplete();
                 }
+
+                @Override
+                public void error(Throwable throwable) {
+                    subject.onError(throwable);
+                }
             };
         }
 
@@ -140,6 +145,11 @@ public final class RxActivityResult {
 
                     //If code reaches this point it means some other activity has been stacked as a secondary process.
                     //Do nothing until the current activity be the target activity to get the associated fragment
+                }
+
+                @Override
+                public void error(Throwable throwable) {
+                    subject.onError(throwable);
                 }
             };
         }
