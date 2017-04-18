@@ -26,7 +26,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile 'com.github.VictorAlbertos:RxActivityResult:0.4.1-2.x'
+    compile 'com.github.VictorAlbertos:RxActivityResult:0.4.3-2.x'
     compile 'io.reactivex.rxjava2:rxjava:2.0.5'
 }
 ```
@@ -90,7 +90,7 @@ RxActivityResult.on(this).startIntentSender(pendingIntent.getIntentSender(), new
 ```
 
 ## Examples
-There is an example of RxActivityResult using both activity and fragment in the [app module](https://github.com/VictorAlbertos/RxActivityResult/tree/master/app)
+There is an example of RxActivityResult using both activity and fragment in the [app module](https://github.com/VictorAlbertos/RxActivityResult/tree/2.x/app)
 
 ## Author
 **Víctor Albertos**
