@@ -17,6 +17,7 @@
 package rx_activity_result2;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
@@ -52,7 +53,13 @@ public class HolderActivity extends Activity {
             if (requestIntentSender.getOptions() == null) startIntentSender(requestIntentSender);
             else startIntentSenderWithOptions(requestIntentSender);
         } else {
-            startActivityForResult(request.intent(), 0);
+            try {
+                startActivityForResult(request.intent(), 0);
+            } catch (ActivityNotFoundException e) {
+                if (onResult != null) {
+                    onResult.error(e);
+                }
+            }
         }
     }
 

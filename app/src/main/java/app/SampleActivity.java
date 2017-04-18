@@ -34,7 +34,7 @@ public class SampleActivity extends AppCompatActivity {
                     } else {
                         result.targetUI().printUserCanceled();
                     }
-                });
+                }, Throwable::printStackTrace);
     }
 
     private void showImage(Intent data) {

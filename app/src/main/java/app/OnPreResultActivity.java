@@ -26,7 +26,7 @@ public class OnPreResultActivity extends AppCompatActivity {
 
         startPreForResult.setOnClickListener(v ->
             RxActivityResult.on(this)
-                .startIntent(new Intent(this, FirstActivity.class), (resultCode, data) ->
+                .startIntent(new Intent(this, FirstActivity.class), (resultCode, requestCode, data) ->
                         Observable.just(Ignore.Get)
                                 .map(_I -> data.putExtra(EXTRA_PRE, "Do whatever you want with the data, but not with the UI")))
                 .subscribe(result -> {
