@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.VictorAlbertos'
-version='0.4.1-2.x'
+version='0.4.4-2.x'
 
 android {
     compileSdkVersion 25
@@ -27,4 +27,10 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:2.0.5"
 
     testCompile 'junit:junit:4.12'
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.artifactId = 'RxActivityResult'
+    }
 }
