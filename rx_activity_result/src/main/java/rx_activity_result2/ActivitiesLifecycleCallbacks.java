@@ -3,7 +3,7 @@ package rx_activity_result2;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
