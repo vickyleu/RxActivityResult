@@ -47,7 +47,7 @@ public class SampleApp extends Application {
 You can call `RxActivityResult.on(this).startIntent(intent)` supplying both, an `Activity` instance or a `Fragment` instance.
 Observe the emitted [Result](https://github.com/VictorAlbertos/RxActivityResult/blob/master/rx_activity_result/src/main/java/rx_activity_result/Result.java) item to know the resultCode and retrieve the associated data if appropriate.  
 
-**Limitation:**: Your fragments need to extend from `android.support.v4.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified. 
+**Limitation:** Your fragments need to extend from `androidx.fragment.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified.
 
 
 ```java
