@@ -1,3 +1,8 @@
+:warning: Deprecated :warning:
+
+This library is no longer mantained. You should use the Android Navigation component with `NavBackStackEntry` for [returning a result to the previous Destination](https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result).
+
+
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-RxActivityResult-green.svg?style=true)](https://android-arsenal.com/details/1/3284)
 
 [![Join the chat at https://gitter.im/VictorAlbertos/RxActivityResult](https://badges.gitter.im/VictorAlbertos/RxActivityResult.svg)](https://gitter.im/VictorAlbertos/RxActivityResult?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
