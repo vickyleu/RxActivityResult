@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.victoralbertos.rxactivityresult">
+    package="rx_activity_result3">
 
   <application>
     <activity
-        android:name="rx_activity_result2.HolderActivity"
+        android:name="rx_activity_result3.HolderActivity"
         android:configChanges="orientation|keyboardHidden|screenSize"
         android:theme="@style/Theme.Transparent"/>
   </application>

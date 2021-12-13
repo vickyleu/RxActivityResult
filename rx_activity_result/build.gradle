@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'maven-publish'
+    id 'kotlin-android'
 }
 group = 'com.github.vickyleu'
 version = '1.0.0'
@@ -37,7 +38,7 @@ android {
 dependencies {
     api "androidx.fragment:fragment:1.4.0"
     api "io.reactivex.rxjava3:rxjava:3.1.3"
-    runtimeOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+//    implementation 'com.github.vickyleu:RxActivityResult:1.0.0'
 }
 
 afterEvaluate {

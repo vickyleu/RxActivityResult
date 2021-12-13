@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rx_activity_result2
+package rx_activity_result3
 
 import android.content.Intent
-import rx_activity_result2.OnPreResult
-import rx_activity_result2.OnResult
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import rx_activity_result2.HolderActivity
-import rx_activity_result2.RequestIntentSender
-import android.content.ActivityNotFoundException
-import android.content.IntentSender.SendIntentException
-import kotlin.Throws
-import rx_activity_result2.ActivitiesLifecycleCallbacks
-import rx_activity_result2.RxActivityResult
 import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlin.jvm.JvmOverloads
 import android.content.IntentSender
 import androidx.fragment.app.FragmentActivity
-import kotlin.jvm.Volatile
-import android.app.Application.ActivityLifecycleCallbacks
 import androidx.fragment.app.Fragment
 import io.reactivex.rxjava3.core.Observable
 import java.lang.IllegalStateException

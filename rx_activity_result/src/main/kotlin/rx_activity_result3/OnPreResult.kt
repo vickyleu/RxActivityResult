@@ -1,4 +1,4 @@
-package rx_activity_result2
+package rx_activity_result3
 
 import android.content.Intent
 import io.reactivex.rxjava3.core.Observable
