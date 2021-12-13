@@ -27,6 +27,11 @@ android {
     lintOptions {
         abortOnError false
     }
+    sourceSets {
+        main {
+            main.java.srcDirs += 'src/main/kotlin'
+        }
+    }
 }
 
 dependencies {
