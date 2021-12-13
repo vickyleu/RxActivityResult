@@ -13,37 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package rx_activity_result2
 
-package rx_activity_result2;
+import android.content.Intent
 
-import android.content.Intent;
-
-public class Result<T> {
-    private final T targetUI;
-    private final int resultCode;
-    private final int requestCode;
-    private final Intent data;
-
-    public Result(T targetUI, int requestCode, int resultCode, Intent data) {
-        this.targetUI = targetUI;
-        this.resultCode = resultCode;
-        this.requestCode = requestCode;
-        this.data = data;
+class Result<T>(
+    private val targetUI: T,
+    private val requestCode: Int,
+    private val resultCode: Int,
+    private val data: Intent?
+) {
+    fun requestCode(): Int {
+        return requestCode
     }
 
-    public int requestCode() {
-        return requestCode;
+    fun resultCode(): Int {
+        return resultCode
     }
 
-    public int resultCode() {
-        return resultCode;
+    fun data(): Intent? {
+        return data
     }
 
-    public Intent data() {
-        return data;
-    }
-
-    public T targetUI() {
-        return targetUI;
+    fun targetUI(): T {
+        return targetUI
     }
 }

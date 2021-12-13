@@ -1,16 +1,18 @@
-apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.VictorAlbertos'
-version='0.4.4-2.x'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
+group = 'com.github.vickyleu'
+version = '1.0.0'
 
 android {
-    compileSdkVersion 28
-
+    compileSdkVersion 30
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
     }
     buildTypes {
         release {
@@ -18,17 +20,31 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
-    api "androidx.fragment:fragment:1.0.0"
-    api "io.reactivex.rxjava2:rxjava:2.2.3"
-
-    testImplementation 'junit:junit:4.12'
+    api "androidx.fragment:fragment:1.4.0"
+    api "io.reactivex.rxjava3:rxjava:3.1.3"
+    runtimeOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }
 
-install {
-    repositories.mavenInstaller {
-        pom.artifactId = 'RxActivityResult'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.vickyleu'
+                artifactId = 'rxresult'
+                version = '1.0.0'
+            }
+        }
     }
 }

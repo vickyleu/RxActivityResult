@@ -13,38 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package rx_activity_result2
 
-package rx_activity_result2;
+import android.content.Intent
+import rx_activity_result2.OnPreResult
+import rx_activity_result2.OnResult
+import android.app.Activity
+import android.os.Bundle
+import rx_activity_result2.HolderActivity
+import rx_activity_result2.RequestIntentSender
+import android.content.ActivityNotFoundException
+import android.content.IntentSender.SendIntentException
+import kotlin.Throws
+import rx_activity_result2.ActivitiesLifecycleCallbacks
+import rx_activity_result2.RxActivityResult
+import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlin.jvm.JvmOverloads
+import android.content.IntentSender
+import androidx.fragment.app.FragmentActivity
+import kotlin.jvm.Volatile
+import android.app.Application.ActivityLifecycleCallbacks
 
-import android.content.Intent;
-import androidx.annotation.Nullable;
-
-class Request {
-    private final Intent intent;
-    private OnPreResult onPreResult;
-    private OnResult onResult;
-
-    public Request(@Nullable Intent intent) {
-        this.intent = intent;
+open class Request(private val intent: Intent?) {
+    private var onPreResult: OnPreResult<*>? = null
+    private var onResult: OnResult? = null
+    fun setOnPreResult(onPreResult: OnPreResult<*>?) {
+        this.onPreResult = onPreResult
     }
 
-    void setOnPreResult(@Nullable OnPreResult onPreResult) {
-        this.onPreResult = onPreResult;
+    fun onPreResult(): OnPreResult<*>? {
+        return onPreResult
     }
 
-    OnPreResult onPreResult() {
-        return onPreResult;
+    fun setOnResult(onResult: OnResult?) {
+        this.onResult = onResult
     }
 
-    public void setOnResult(OnResult onResult) {
-        this.onResult = onResult;
+    fun onResult(): OnResult? {
+        return onResult
     }
 
-    public OnResult onResult() {
-        return onResult;
-    }
-
-    @Nullable public Intent intent() {
-        return intent;
+    fun intent(): Intent? {
+        return intent
     }
 }

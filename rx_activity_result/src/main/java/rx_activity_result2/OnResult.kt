@@ -1,11 +1,9 @@
-package rx_activity_result2;
+package rx_activity_result2
 
-import android.content.Intent;
-import androidx.annotation.Nullable;
+import android.content.Intent
+import java.io.Serializable
 
-import java.io.Serializable;
-
-interface OnResult extends Serializable {
-    void response(int requestCode, int resultCode, @Nullable Intent data);
-    void error(Throwable throwable);
+interface OnResult : Serializable {
+    fun response(requestCode: Int, resultCode: Int, data: Intent?)
+    fun error(throwable: Throwable?)
 }

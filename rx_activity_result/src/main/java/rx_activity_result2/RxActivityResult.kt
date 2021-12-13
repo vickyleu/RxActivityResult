@@ -13,162 +13,158 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package rx_activity_result2
 
-package rx_activity_result2;
+import android.content.Intent
+import rx_activity_result2.OnPreResult
+import rx_activity_result2.OnResult
+import android.app.Activity
+import android.app.Application
+import android.os.Bundle
+import rx_activity_result2.HolderActivity
+import rx_activity_result2.RequestIntentSender
+import android.content.ActivityNotFoundException
+import android.content.IntentSender.SendIntentException
+import kotlin.Throws
+import rx_activity_result2.ActivitiesLifecycleCallbacks
+import rx_activity_result2.RxActivityResult
+import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlin.jvm.JvmOverloads
+import android.content.IntentSender
+import androidx.fragment.app.FragmentActivity
+import kotlin.jvm.Volatile
+import android.app.Application.ActivityLifecycleCallbacks
+import androidx.fragment.app.Fragment
+import io.reactivex.rxjava3.core.Observable
+import java.lang.IllegalStateException
 
-import android.app.Activity;
-import android.app.Application;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-
-import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.subjects.PublishSubject;
-
-
-public final class RxActivityResult {
-    static ActivitiesLifecycleCallbacks activitiesLifecycle;
-
-    private RxActivityResult() {
+object RxActivityResult {
+    var activitiesLifecycle: ActivitiesLifecycleCallbacks? = null
+    fun register(application: Application) {
+        activitiesLifecycle = ActivitiesLifecycleCallbacks(application)
     }
 
-    public static void register(final Application application) {
-        activitiesLifecycle = new ActivitiesLifecycleCallbacks(application);
+    fun <T : Activity?> on(activity: T): Builder<T> {
+        return Builder(activity)
     }
 
-    public static <T extends Activity> Builder<T> on(T activity) {
-        return new Builder<T>(activity);
+    fun <T : Fragment?> on(fragment: T): Builder<T> {
+        return Builder(fragment)
     }
 
-    public static <T extends Fragment> Builder<T> on(T fragment) {
-        return new Builder<T>(fragment);
-    }
+    class Builder<T>(private val t: T) {
+        val clazz: Class<*>
+        val subject: PublishSubject<Result<T?>> = PublishSubject.create()
+        private val uiTargetActivity: Boolean
+        @JvmOverloads
+        fun startIntentSender(
+            intentSender: IntentSender?,
+            fillInIntent: Intent?,
+            flagsMask: Int,
+            flagsValues: Int,
+            extraFlags: Int,
+            options: Bundle? = null
+        ): Observable<Result<T?>> {
+            val requestIntentSender = RequestIntentSender(
+                intentSender,
+                fillInIntent,
+                flagsMask,
+                flagsValues,
+                extraFlags,
+                options
+            )
+            return startHolderActivity(requestIntentSender, null)
+        }
 
-    public static class Builder<T> {
-        final Class clazz;
-        final PublishSubject<Result<T>> subject = PublishSubject.create();
-        private final boolean uiTargetActivity;
+        @JvmOverloads
+        fun startIntent(
+            intent: Intent?,
+            onPreResult: OnPreResult<*>? = null
+        ): Observable<Result<T?>> {
+            return startHolderActivity(Request(intent), onPreResult)
+        }
 
-        public Builder(T t) {
-            if (activitiesLifecycle == null) {
-                throw new IllegalStateException(Locale.RX_ACTIVITY_RESULT_NOT_REGISTER);
+        private fun startHolderActivity(
+            request: Request,
+            onPreResult: OnPreResult<*>?
+        ): Observable<Result<T?>> {
+            val onResult = if (uiTargetActivity) onResultActivity() else onResultFragment()
+            request.setOnResult(onResult)
+            request.setOnPreResult(onPreResult)
+            HolderActivity.setRequest(request)
+            activitiesLifecycle?.oLiveActivity?.subscribe { activity ->
+                (activity?:return@subscribe).startActivity(
+                    Intent(activity, HolderActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                )
             }
-
-            this.clazz = t.getClass();
-            this.uiTargetActivity = t instanceof Activity;
+            return subject
         }
 
-        public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags) {
-            return startIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, null);
-        }
-
-        public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, @Nullable Bundle options) {
-            RequestIntentSender requestIntentSender = new RequestIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, options);
-            return startHolderActivity(requestIntentSender, null);
-        }
-
-        public Observable<Result<T>> startIntent(final Intent intent) {
-            return startIntent(intent, null);
-        }
-
-        public Observable<Result<T>> startIntent(final Intent intent, @Nullable OnPreResult onPreResult) {
-            return startHolderActivity(new Request(intent), onPreResult);
-        }
-
-        private Observable<Result<T>> startHolderActivity(Request request, @Nullable OnPreResult onPreResult) {
-
-            OnResult onResult = uiTargetActivity ? onResultActivity() : onResultFragment();
-            request.setOnResult(onResult);
-            request.setOnPreResult(onPreResult);
-
-            HolderActivity.setRequest(request);
-
-            activitiesLifecycle.getOLiveActivity().subscribe(new Consumer<Activity>() {
-                @Override
-                public void accept(Activity activity) throws Exception {
-                    activity.startActivity(new Intent(activity, HolderActivity.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
-                }
-            });
-
-            return subject;
-        }
-
-        private OnResult onResultActivity() {
-            return new OnResult() {
-                @Override
-                public void response(int requestCode, int resultCode, Intent data) {
-                    if (activitiesLifecycle.getLiveActivity() == null) return;
+        private fun onResultActivity(): OnResult {
+            return object : OnResult {
+                override fun response(requestCode: Int, resultCode: Int, data: Intent?) {
+                    if (activitiesLifecycle?.liveActivity == null) return
 
                     //If true it means some other activity has been stacked as a secondary process.
                     //Wait until the current activity be the target activity
-                    if (activitiesLifecycle.getLiveActivity().getClass() != clazz) {
-                        return;
+                    if (activitiesLifecycle?.liveActivity?.javaClass != clazz) {
+                        return
                     }
-
-                    T activity = (T) activitiesLifecycle.getLiveActivity();
-                    subject.onNext(new Result<>(activity, requestCode, resultCode, data));
-                    subject.onComplete();
+                    val activity = activitiesLifecycle?.liveActivity as T?
+                    subject.onNext(Result(activity, requestCode, resultCode, data))
+                    subject.onComplete()
                 }
 
-                @Override
-                public void error(Throwable throwable) {
-                    subject.onError(throwable);
+                override fun error(throwable: Throwable?) {
+                    subject.onError(throwable)
                 }
-            };
+            }
         }
 
-        private OnResult onResultFragment() {
-            return new OnResult() {
-                @Override
-                public void response(int requestCode, int resultCode, Intent data) {
-                    if (activitiesLifecycle.getLiveActivity() == null) return;
-
-                    Activity activity = activitiesLifecycle.getLiveActivity();
-
-                    FragmentActivity fragmentActivity = (FragmentActivity) activity;
-                    FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
-
-                    Fragment targetFragment = getTargetFragment(fragmentManager.getFragments());
-
+        private fun onResultFragment(): OnResult {
+            return object : OnResult {
+                override fun response(requestCode: Int, resultCode: Int, data: Intent?) {
+                    if (activitiesLifecycle?.liveActivity == null) return
+                    val activity = activitiesLifecycle?.liveActivity
+                    val fragmentActivity = activity as FragmentActivity?
+                    val fragmentManager = fragmentActivity!!.supportFragmentManager
+                    val targetFragment = getTargetFragment(fragmentManager.fragments)
                     if (targetFragment != null) {
-                        subject.onNext(new Result<>((T) targetFragment, requestCode, resultCode, data));
-                        subject.onComplete();
+                        subject.onNext(Result(targetFragment as T, requestCode, resultCode, data))
+                        subject.onComplete()
                     }
 
                     //If code reaches this point it means some other activity has been stacked as a secondary process.
                     //Do nothing until the current activity be the target activity to get the associated fragment
                 }
 
-                @Override
-                public void error(Throwable throwable) {
-                    subject.onError(throwable);
-                }
-            };
-        }
-
-        @Nullable
-        Fragment getTargetFragment(List<Fragment> fragments) {
-            if (fragments == null) return null;
-
-            for (Fragment fragment : fragments) {
-                if (fragment != null && fragment.isVisible() && fragment.getClass() == clazz) {
-                    return fragment;
-                } else if (fragment != null && fragment.isAdded() && fragment.getChildFragmentManager() != null) {
-                    List<Fragment> childFragments = fragment.getChildFragmentManager().getFragments();
-                    Fragment candidate = getTargetFragment(childFragments);
-                    if (candidate != null) return candidate;
+                override fun error(throwable: Throwable?) {
+                    subject.onError(throwable)
                 }
             }
+        }
 
-            return null;
+        fun getTargetFragment(fragments: List<Fragment?>?): Fragment? {
+            if (fragments == null) return null
+            for (fragment in fragments) {
+                if (fragment != null && fragment.isVisible && fragment.javaClass == clazz) {
+                    return fragment
+                } else if (fragment != null && fragment.isAdded && fragment.childFragmentManager != null) {
+                    val childFragments = fragment.childFragmentManager.fragments
+                    val candidate = getTargetFragment(childFragments)
+                    if (candidate != null) return candidate
+                }
+            }
+            return null
+        }
+
+        init {
+            if (activitiesLifecycle == null) {
+                throw IllegalStateException(Locale.RX_ACTIVITY_RESULT_NOT_REGISTER)
+            }
+            uiTargetActivity = t is Activity
+            clazz = t!!::class.java
         }
     }
 }

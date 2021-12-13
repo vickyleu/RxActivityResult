@@ -13,107 +13,112 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package rx_activity_result2
 
-package rx_activity_result2;
+import android.content.Intent
+import rx_activity_result2.OnPreResult
+import rx_activity_result2.OnResult
+import android.app.Activity
+import android.os.Bundle
+import rx_activity_result2.HolderActivity
+import rx_activity_result2.RequestIntentSender
+import android.content.ActivityNotFoundException
+import android.content.IntentSender.SendIntentException
+import kotlin.Throws
+import rx_activity_result2.ActivitiesLifecycleCallbacks
+import rx_activity_result2.RxActivityResult
+import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlin.jvm.JvmOverloads
+import android.content.IntentSender
+import androidx.fragment.app.FragmentActivity
+import kotlin.jvm.Volatile
+import android.app.Application.ActivityLifecycleCallbacks
 
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.os.Bundle;
-
-import io.reactivex.functions.Action;
-
-public class HolderActivity extends Activity {
-    private static Request request;
-    private OnPreResult onPreResult;
-    private OnResult onResult;
-    private int resultCode;
-    private int requestCode;
-    private Intent data;
-    private static int FAILED_REQUEST_CODE = -909;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+class HolderActivity : Activity() {
+    private var onPreResult: OnPreResult<*>? = null
+    private var onResult: OnResult? = null
+    private var resultCode = 0
+    private var requestCode = 0
+    private var data: Intent? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (request == null) {
-            finish();
-            return;
+            finish()
+            return
         }
-
-        onPreResult = request.onPreResult();
-        onResult = request.onResult();
-
-        if (savedInstanceState != null) return;
-
-        if (request instanceof RequestIntentSender) {
-            RequestIntentSender requestIntentSender = (RequestIntentSender) request;
-
-            if (requestIntentSender.getOptions() == null) startIntentSender(requestIntentSender);
-            else startIntentSenderWithOptions(requestIntentSender);
+        onPreResult = request!!.onPreResult()
+        onResult = request!!.onResult()
+        if (savedInstanceState != null) return
+        if (request is RequestIntentSender) {
+            val requestIntentSender = request as RequestIntentSender?
+            if (requestIntentSender?.options == null) startIntentSender(requestIntentSender?:return) else startIntentSenderWithOptions(
+                requestIntentSender?:return
+            )
         } else {
             try {
-                startActivityForResult(request.intent(), 0);
-            } catch (ActivityNotFoundException e) {
+                startActivityForResult(request!!.intent(), 0)
+            } catch (e: ActivityNotFoundException) {
                 if (onResult != null) {
-                    onResult.error(e);
+                    onResult!!.error(e)
                 }
             }
         }
     }
 
-    private void startIntentSender(RequestIntentSender requestIntentSender) {
+    private fun startIntentSender(requestIntentSender: RequestIntentSender) {
         try {
-            startIntentSenderForResult(requestIntentSender.getIntentSender(), 0,
-                    requestIntentSender.getFillInIntent(), requestIntentSender.getFlagsMask(),
-                    requestIntentSender.getFlagsValues(), requestIntentSender.getExtraFlags());
-        } catch (IntentSender.SendIntentException exception) {
-            exception.printStackTrace();
-            onResult.response(FAILED_REQUEST_CODE, RESULT_CANCELED, null);
+            startIntentSenderForResult(
+                requestIntentSender.intentSender, 0,
+                requestIntentSender.fillInIntent, requestIntentSender.flagsMask,
+                requestIntentSender.flagsValues, requestIntentSender.extraFlags
+            )
+        } catch (exception: SendIntentException) {
+            exception.printStackTrace()
+            onResult!!.response(FAILED_REQUEST_CODE, RESULT_CANCELED, null)
         }
     }
 
-    private void startIntentSenderWithOptions(RequestIntentSender requestIntentSender) {
+    private fun startIntentSenderWithOptions(requestIntentSender: RequestIntentSender) {
         try {
-            startIntentSenderForResult(requestIntentSender.getIntentSender(), 0,
-                    requestIntentSender.getFillInIntent(), requestIntentSender.getFlagsMask(),
-                    requestIntentSender.getFlagsValues(), requestIntentSender.getExtraFlags(), requestIntentSender.getOptions());
-        } catch (IntentSender.SendIntentException exception) {
-            exception.printStackTrace();
-            onResult.response(FAILED_REQUEST_CODE, RESULT_CANCELED, null);
+            startIntentSenderForResult(
+                requestIntentSender.intentSender,
+                0,
+                requestIntentSender.fillInIntent,
+                requestIntentSender.flagsMask,
+                requestIntentSender.flagsValues,
+                requestIntentSender.extraFlags,
+                requestIntentSender.options
+            )
+        } catch (exception: SendIntentException) {
+            exception.printStackTrace()
+            onResult!!.response(FAILED_REQUEST_CODE, RESULT_CANCELED, null)
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        this.resultCode = resultCode;
-        this.requestCode = requestCode;
-        this.data = data;
-
-        if (this.onPreResult != null) {
-            this.onPreResult.response(requestCode, resultCode, data)
-                    .doOnComplete(new Action() {
-                        @Override
-                        public void run() throws Exception {
-                            finish();
-                        }
-                    })
-                    .subscribe();
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        super.onActivityResult(requestCode, resultCode, data)
+        this.resultCode = resultCode
+        this.requestCode = requestCode
+        this.data = data
+        if (onPreResult != null) {
+            onPreResult!!.response(requestCode, resultCode, data)
+                .doOnComplete { finish() }
+                .subscribe()
         } else {
-            finish();
+            finish()
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (onResult != null)
-            onResult.response(requestCode, resultCode, data);
+    override fun onDestroy() {
+        super.onDestroy()
+        if (onResult != null) onResult!!.response(requestCode, resultCode, data)
     }
 
-    static void setRequest(Request aRequest) {
-        request = aRequest;
+    companion object {
+        private var request: Request? = null
+        private const val FAILED_REQUEST_CODE = -909
+        fun setRequest(aRequest: Request?) {
+            request = aRequest
+        }
     }
 }
