@@ -82,15 +82,15 @@ class HolderActivity : Activity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         this.resultCode = resultCode
         this.requestCode = requestCode
         this.data = data
         if (onPreResult != null) {
-            onPreResult!!.response(requestCode, resultCode, data)
-                .doOnComplete { finish() }
-                .subscribe()
+            onPreResult?.response(requestCode, resultCode, data)
+                ?.doOnComplete { finish() }
+                ?.subscribe()
         } else {
             finish()
         }
@@ -98,7 +98,7 @@ class HolderActivity : Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (onResult != null) onResult!!.response(requestCode, resultCode, data)
+       onResult?.response(requestCode, resultCode, data)
     }
 
     companion object {
